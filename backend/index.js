@@ -13,39 +13,21 @@ const userRoute = require('./routes/user')
 const app = express();
 const PORT = process.env.PORT || 8001
 
- // ✅ Smart CORS configuration
-const allowedOrigins = [
-  'http://localhost:5173',
-  'http://127.0.0.1:5173',
-  process.env.CLIENT_URL // This will be your production frontend URL
-].filter(Boolean); // Remove any undefined values
 
 // ✅ FIX: Correct CORS configuration
 app.use(cors({
-  origin: function (origin, callback) {
-    // Allow requests with no origin (like mobile apps or Postman)
-    if (!origin) return callback(null, true);
-    
-    const allowedOrigins = [
-      'http://localhost:5173',
-      'http://127.0.0.1:5173',
-      'https://url-shortner-ai.netlify.app', // Your actual Netlify URL
-      'https://pankaj-url-shortener.netlify.app' // Your custom name if you change it
-    ];
-    
-    // Check if the origin is in allowed list
-    if (allowedOrigins.includes(origin)) {
-      callback(null, true);
-    } else {
-      // For development, you can be more permissive
-      console.log('CORS blocked for origin:', origin);
-      callback(new Error('Not allowed by CORS'));
-    }
-  },
+  origin: 'https://url-shortner-ai.netlify.app',
   credentials: true,
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
   allowedHeaders: ['Content-Type', 'Authorization', 'Cookie']
 }));
+
+// Manual header override to ensure correct origin
+app.use((req, res, next) => {
+  res.header('Access-Control-Allow-Origin', 'https://url-shortner-ai.netlify.app');
+  res.header('Access-Control-Allow-Credentials', 'true');
+  next();
+});
 
 app.use(express.json())
 app.use(express.urlencoded({extended:true}))
