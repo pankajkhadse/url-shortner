@@ -29,7 +29,7 @@ app.use(cors({
     const allowedOrigins = [
       'http://localhost:5173',
       'http://127.0.0.1:5173',
-      'https://utl-shortner.netlify.app', // Your actual Netlify URL
+      'https://url-shortner-ai.netlify.app', // Your actual Netlify URL
       'https://pankaj-url-shortener.netlify.app' // Your custom name if you change it
     ];
     
