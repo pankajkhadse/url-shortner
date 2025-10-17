@@ -63,87 +63,53 @@ function RegisterForm({ apiBase = "", onSuccess = () => {} }) {
   }
 
   async function handleSubmit(e) {
-    e.preventDefault();
-    setError("");
-    setSuccess("");
-    const v = validate();
-    if (v) return setError(v);
+  e.preventDefault();
+  setError("");
+  setSuccess("");
+  const v = validate();
+  if (v) return setError(v);
 
-    setLoading(true);
-    try {
-      const res = await fetch(`${API_BASE_URL}/user/signup`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ name, email, password }),
-      });
-      
-      const body = await res.json();
-      
-      // Handle different HTTP status codes
-      if (res.status === 409) {
-        setError(body.message || "User already exists with this email");
-        return;
-      }
-      
-      if (res.status === 400) {
-        setError(body.message || "Please check your input");
-        return;
-      }
-      
-      if (!res.ok) {
-        throw new Error(body?.message || "Registration failed");
-      }
-      
-      // ✅ Success case - Auto toggle to login after successful registration
-      if (body.success) {
-        setSuccess(body.message || "Registration successful! You can now log in.");
-        setName("");
-        setEmail("");
-        setPassword("");
-        
-        // Show SweetAlert success message
-        Swal.fire({
-          icon: 'success',
-          title: 'Registration Successful!',
-          text: body.message || 'You can now log in with your credentials',
-          confirmButtonText: 'Go to Login',
-          confirmButtonColor: '#4f46e5'
-        }).then((result) => {
-          if (result.isConfirmed) {
-            // ✅ Call onSuccess to toggle to login tab
-            onSuccess(body);
-          } else {
-            // ✅ Auto-toggle to login even if user doesn't click the button
-            setTimeout(() => {
-              onSuccess(body);
-            }, 1500);
-          }
-        });
-        
-        // ✅ Auto-toggle to login after 2 seconds (fallback)
-        setTimeout(() => {
-          onSuccess(body);
-        }, 2000);
-        
-      } else {
-        setError(body.message || "Registration failed");
-      }
-    } catch (err) {
-      console.error("Registration error:", err);
-      
+  setLoading(true);
+  try {
+    const res = await fetch(`${API_BASE_URL}/user/signup`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ name, email, password }),
+    });
+    
+    const body = await res.json();
+    
+    // ✅ SOLUTION: Check res.ok for success instead of body.success
+    if (res.ok) {
+      // Show SweetAlert success message
       Swal.fire({
-        icon: 'error',
-        title: 'Registration Failed',
-        text: err.message || 'Something went wrong during registration',
-        confirmButtonText: 'OK',
-        confirmButtonColor: '#4f46e5'
+        icon: 'success',
+        title: 'Registration Successful!',
+        text: body.message || 'You can now log in with your credentials',
+        confirmButtonText: 'Go to Login',
+      }).then((result) => {
+        // This logic correctly toggles the form to the login tab
+        onSuccess(body); 
       });
-      
-      setError(err.message);
-    } finally {
-      setLoading(false);
+
+      // Clear form fields
+      setName("");
+      setEmail("");
+      setPassword("");
+
+    } else {
+      // All other non-ok responses will be treated as errors
+      // The body.message will come from your backend's error responses
+      throw new Error(body.message || "An unknown error occurred");
     }
+
+  } catch (err) {
+    // This catches network errors or the error thrown above
+    setError(err.message);
+  } finally {
+    setLoading(false);
   }
+}
 
   return (
     <form onSubmit={handleSubmit} className="space-y-4">

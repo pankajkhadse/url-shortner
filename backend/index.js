@@ -15,19 +15,27 @@ const PORT = process.env.PORT || 8001
 
 
 // ✅ FIX: Correct CORS configuration
+// app.use(cors({
+//   origin: 'https://url-shortner-ai.netlify.app',
+//   credentials: true,
+//   methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+//   allowedHeaders: ['Content-Type', 'Authorization', 'Cookie']
+// }));
+
+// // Manual header override to ensure correct origin
+// app.use((req, res, next) => {
+//   res.header('Access-Control-Allow-Origin', 'https://url-shortner-ai.netlify.app');
+//   res.header('Access-Control-Allow-Credentials', 'true');
+//   next();
+// });
+
+// ✅ Dynamic CORS Configuration
 app.use(cors({
-  origin: 'https://url-shortner-ai.netlify.app',
+  origin: process.env.CLIENT_URL, // Reads from your .env file
   credentials: true,
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
-  allowedHeaders: ['Content-Type', 'Authorization', 'Cookie']
+  allowedHeaders: ['Content-Type', 'Authorization']
 }));
-
-// Manual header override to ensure correct origin
-app.use((req, res, next) => {
-  res.header('Access-Control-Allow-Origin', 'https://url-shortner-ai.netlify.app');
-  res.header('Access-Control-Allow-Credentials', 'true');
-  next();
-});
 
 app.use(express.json())
 app.use(express.urlencoded({extended:true}))
